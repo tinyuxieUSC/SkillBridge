@@ -1,61 +1,81 @@
-# SkillBridge Live AI — Netlify deployment
+# SkillBridge AI — Gemini + browser AI hybrid
 
-This project upgrades the offline SkillBridge prototype with **real AI** for (1) job/resume skill-evidence comparison and (2) feedback on student challenge submissions. The existing cases and practice data remain curated and synthetic. It does NOT automatically generate arbitrary new business cases.
+**This is the upgraded SkillBridge project.** It preserves the existing skill-gap scan, three curated business challenges, advisory evaluation, portfolio export, and prototype feedback form.
 
-## What is inside
+## How the AI works
 
-- `public/index.html` — the working website, including an access-code input.
-- `netlify/functions/status.mjs` — verifies that your team's live-AI backend is available.
-- `netlify/functions/skill-gap.mjs` — safely sends job/resume text to the model.
-- `netlify/functions/review.mjs` — sends a synthetic case and student answers for rubric feedback.
-- `netlify/functions/_shared/common.mjs` — shared backend utilities.
-- `netlify.toml` — instructs Netlify which files are public and which are server-side functions.
+1. **First choice: Google Gemini**, used from a Netlify serverless function. The AI key is kept on the server. This requires a Gemini free-tier API key, a private team access code, and a full Netlify deploy.
+2. **Backup: WebLLM in the student's browser.** Click **Load local backup** once, choose a lightweight or balanced model, and allow the model download. Once loaded, if Gemini is unavailable or rate-limited, SkillBridge automatically uses the local model for skill scans and reviews. It also works as the main AI if no Gemini server has been configured.
+3. **Last resort: rules demo.** If neither AI is available, the existing deterministic rules remain usable. The interface explicitly marks them **not AI**.
 
-## Before you start
+No remote Gemini charges are required to run browser inference. Browser inference uses the *visitor's device*; it is not free hosting of an unlimited remote service. Initial downloads can be large, and hardware/browser compatibility varies. The tiny local model is less accurate than Gemini. WebLLM may need Chrome/Edge with WebGPU and available GPU memory. All user information should be fictional/anonymized during a student demo.
 
-1. You need a **Netlify account** and an **OpenAI API account/key with appropriate billing/credits**. ChatGPT Plus is not the same as API credits.
-2. Choose a strong, private **team access code** (e.g. a randomly generated password). Don't put that code or your OpenAI key into any project file or Git repository.
-3. Use **sample/anonymized resumes** for the demonstration. Text submitted to the AI endpoints is sent to OpenAI for analysis. The frontend saves student inputs on that device's browser only; it does not use shared accounts or a central database.
+## Quick deployment — complete hybrid (recommended)
 
-## Option A: Deploy using GitHub + Netlify (no terminal)
+1. Unzip this package. The top-level folder contains `netlify.toml`, a `public/` directory, and `netlify/functions/`. **Do not upload only `index.html`**.
+2. Create a private GitHub repo and upload the **contents** of this folder (retain the paths). Do not add credentials to the repository.
+3. In Netlify, create a new project by **Import an existing project → GitHub**, select the repo, and deploy. The supplied `netlify.toml` sets `publish=public` and `functions=netlify/functions`. No npm build is required.
+4. In [Google AI Studio](https://aistudio.google.com/apikey), get a Gemini API key with free-tier access. Free quotas and model access depend on your account, region, and the provider's current policies.
+5. In Netlify's project environment-variable settings, set:
 
-1. Create a new private GitHub repository named `skillbridge-live`.
-2. Upload the CONTENTS of this folder so the repository ROOT contains `netlify.toml`, a `public` folder, and a `netlify` folder **with their internal directory structure preserved**. Don't upload the `.zip` as your repository's only file.
-3. In Netlify, **Add new project → Import an existing project → GitHub**, select that repository and deploy it. The included `netlify.toml` sets the publish folder and function paths; leave the auto-detected defaults if they match.
-4. In Netlify **Project configuration → Environment variables**, add:
-   - `OPENAI_API_KEY`: your PRIVATE OpenAI API key
-   - `SKILLBRIDGE_ACCESS_CODE`: your PRIVATE team access code
-   - `SKILLBRIDGE_MODEL`: `gpt-4o-mini` (optional; this is the default)
-   Enable the **Functions** scope if Netlify asks about variable scopes.
-5. **Trigger a new deployment** so the functions can see newly configured environment variables.
-6. Open your published URL. The top should read **AI ready · enter code**. Type the team access code into the sidebar and click **Connect live AI**. It should change to **Live AI connected**.
-7. Test **Skill Scan** with the prefilled sample, and **Review & Portfolio** with a worked example. The scan's method should read **AI text comparison** and the review's method should read **AI rubric review**.
+   | Name | Example value | Required |
+   | --- | --- | --- |
+   | `GEMINI_API_KEY` | your private key from AI Studio | Yes for Gemini |
+   | `SKILLBRIDGE_ACCESS_CODE` | a secret password only shared with your testers | Yes for Gemini |
+   | `SKILLBRIDGE_MODEL` | `gemini-3.5-flash-lite` | Optional; this is the default |
 
-Git-backed deployment also makes updates straightforward: commit changed files and Netlify redeploys.
+6. Redeploy the site so the functions can read the environment variables. Open the HTTPS project URL, enter the team code in the left sidebar, and press **Connect Gemini**. The first successful skill scan should show **Gemini AI (server-side)**.
+7. On a supported desktop browser, click **Load local backup**. The progress message shows model loading. Once it says **Local AI ready**, a failed Gemini request falls back to **WebLLM browser AI** automatically.
 
-## Option B: Deploy through Netlify CLI (if you already have Node.js)
+### Simpler: publish a local-AI-only website
 
-Run these commands from the FOLDER that contains `netlify.toml`:
+You can drag the **entire `public/` folder** to [Netlify Drop](https://app.netlify.com/drop). The WebLLM fallback can work there with no backend and no Gemini credentials, subject to WebGPU. The **Gemini functions do not get installed via a static folder drag-and-drop**. You still need to click **Load local backup** and permit the model download.
 
-```sh
-npx netlify-cli login
-npx netlify-cli link
-npx netlify-cli deploy --prod
+## Test the three modes
+
+- **Gemini primary:** Connect Gemini; analyze the prefilled Product Analyst resume/job; the scan method should say `Gemini AI (server-side)`.
+- **Local backup:** Click `Load local backup`. Temporarily remove/disable the Gemini connection or let a real provider error occur. The scan method should say `WebLLM browser AI` after local generation. A retry must complete before the same result is shown.
+- **Rules demonstration:** If both services are unavailable, scans are labeled `Rule-based keyword demo (not AI)` and reviews `Rule-based demo rubric (not AI)`.
+
+The app does **not** automatically generate brand-new practice datasets or cases. It uses three curated synthetic case templates: experimentation, retention and pricing. Users can download the CSV, submit their own reasoning, get an advisory review and export a Markdown portfolio draft.
+
+## What is and isn't tested
+
+**Tested:** The browser UI's end-to-end skill scan, challenge submission and review in deterministic demo mode, a mocked Gemini success path, and a mocked Gemini-failure-to-WebLLM path. JavaScript parse checks were passed.
+
+**Not yet validated here:** Real Gemini API responses using your personal key, WebLLM's initial model download and GPU inference on your actual device, real Netlify deployment, usage quotas, or response quality across many student inputs. Test these before presenting the app as fully live.
+
+## Responsible testing
+
+- Do not put API keys in `public/` or client-side JavaScript; put them only in Netlify environment variables.
+- Do not publish your team's access code. It is a shared gate, *not* per-user authentication or a production anti-abuse system. Even with the code, free quotas apply.
+- Free-tier Gemini input may be processed according to Google's free-tier data-use policies. Use sample resumes with **no phone, email, address, or sensitive details**.
+- For the competition's Voice-of-Customer requirement, collect genuine student feedback, then change at least one feature based on the results. The app's local feedback isn't shared among browsers by default; export and combine the genuine records.
+- **This app is custom-coded and therefore does not itself fulfill the prompt's no-code-platform criterion.** To fully satisfy that requirement, replicate a meaningful piece of the workflow in Make or Bubble and document it.
+
+## Technical contents
+
+```
+SkillBridge_Hybrid_Gemini_WebLLM/
+  netlify.toml
+  .gitignore
+  README_FIRST.md
+  public/
+    index.html              # front end + curated business challenges
+    js/local-ai.js          # browser inference engine via WebLLM CDN
+  netlify/functions/
+    status.mjs              # reports server setup (no secrets exposed)
+    skill-gap.mjs           # Gemini skill-gap endpoint
+    review.mjs              # Gemini practice-review endpoint
+    _shared/common.mjs     # auth, validation, Gemini API call
 ```
 
-Select your existing SkillBridge Netlify project during `link`. Add the environment variables through the Netlify project dashboard as described in Option A, and redeploy. You must deploy the **whole project**, not just `public/index.html`.
+### Reference docs
 
-## Quick troubleshooting
+- [WebLLM getting started](https://webllm.mlc.ai/docs/user/get_started.html)
+- [WebLLM predefined models](https://github.com/mlc-ai/web-llm/blob/main/src/config.ts)
+- [Google Gemini API models](https://ai.google.dev/gemini-api/docs/models)
+- [Google Gemini pricing](https://ai.google.dev/gemini-api/docs/pricing)
+- [Netlify Functions docs](https://docs.netlify.com/build/functions/overview/)
 
-| What you see | Meaning / fix |
-|---|---|
-| Demo mode | The backend is missing or its environment variables are not configured. Check the Netlify Functions deploy log. |
-| AI ready · enter code | Backend is configured; unlock with your private team access code. |
-| Incorrect team access code | The entered code must exactly match `SKILLBRIDGE_ACCESS_CODE`. |
-| AI rate limit or quota reached | Confirm API billing, rate limits, and available budget. |
-| AI scan error; using demo scan | Backend failed; browser falls back to local rules. Check Netlify function logs and API key. |
-| Double-clicked `index.html` directly | Static HTML alone cannot run a Netlify backend; test on the deployed URL. |
-
-**Responsible demo:** Don't publicly post the team code; consider an OpenAI project spending cap and rotate the code when done. The password is only a simple team demo gate, not secure authentication for a production app. AI-generated assessments may be wrong and should be checked by humans.
-
-**Competition compliance:** The Netlify backend is custom code. Putting it online and using AI does NOT, by itself, satisfy the contest's *no-code platform* requirement. For the final submission, document an actual Bubble/Make no-code workflow or migrate core functions there, plus collect real student research, prototype feedback, and at least one feedback-driven revision. Do not present uncollected data as actual findings.
+No credentials are embedded in this package.

@@ -1,0 +1,17 @@
+SKILLBRIDGE HYBRID — GEMINI + FREE LOCAL BACKUP
+
+1) Download and unzip the package.
+2) To get the full Gemini + local backup, upload the whole project to a private GitHub repo.
+3) Import the GitHub repo in Netlify.
+4) Add Netlify environment variables: GEMINI_API_KEY and SKILLBRIDGE_ACCESS_CODE.
+5) Redeploy. Open your HTTPS site and enter your team access code.
+6) Click Load local backup in the sidebar. Let the model download fully once.
+7) Analyze a sample resume/job. Gemini is tried first; if it fails, the loaded local model is used.
+
+NO API KEY YET? You can drag the PUBLIC FOLDER to Netlify Drop to try browser-only WebLLM.
+This does NOT deploy Gemini functions.
+
+The local model requires WebGPU, significant memory, an initial download, and a compatible browser.
+If neither AI works, only the clearly labeled rule-based demonstration remains.
+
+START WITH README_FIRST.md FOR COMPLETE INSTRUCTIONS.
