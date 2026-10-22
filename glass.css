@@ -102,3 +102,5 @@ body.dark .top-nav-link.active{color:#272037}body.dark .challenge-card .card-sym
 @media print{.topbar,.nav-shell,.site-footer,.mobile-nav-panel,.hero-glass,.marquee-band,.bottom-cta{display:none!important}body{background:#fff;color:#000}.page{padding:0}}
 /* Ensure polished typography even if remote webfonts are blocked. */
 h1,h2,h3,h4,.section-title,.paper h1,.paper h2,.lab-layout h2,.lab-layout h3,.path-card h3,.portfolio-card h3{font-family:Outfit,Manrope,system-ui,sans-serif!important}
+/* Keep feedback clear of the hosting badge. */
+.toast-stack{left:22px;right:auto;max-width:min(340px,calc(100vw - 44px));}
