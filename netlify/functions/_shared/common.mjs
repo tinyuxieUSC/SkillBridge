@@ -47,6 +47,11 @@ export async function askAI(instructions,payload,format){
       })
     });
     if(!response.ok){
+      const failure=await response.json().catch(()=>({}));
+      const reason=String(failure.error?.message||'');
+      if(/API key not valid|API_KEY_INVALID|API key expired/i.test(reason))throw new Error('Gemini API key is invalid or expired. Replace GEMINI_API_KEY in Netlify and redeploy.');
+      if(/responseFormat|response_format|Unknown name/i.test(reason))throw new Error('Gemini request format is unsupported by this API.');
+      if(/billing|location|country|region/i.test(reason))throw new Error('Gemini is unavailable for this project billing configuration or region.');
       if(response.status===429)throw new Error('Gemini free-tier usage limit reached. Try again when your quota resets.');
       if(response.status===401||response.status===403)throw new Error('Gemini key invalid, access denied, or model not available to this project.');
       if(response.status===404)throw new Error('Gemini model unavailable. Set SKILLBRIDGE_MODEL to another available free-tier model.');
