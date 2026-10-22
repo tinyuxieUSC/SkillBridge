@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import status from '../netlify/functions/status.mjs';
+import ai from '../netlify/functions/ai.mjs';
+const call=(kind,payload={},code='test-secret')=>ai(new Request('https://skillbridge.example/api/ai',{method:'POST',headers:{'Content-Type':'application/json','X-SkillBridge-Code':code},body:JSON.stringify({kind,payload})}));
+process.env.GEMINI_API_KEY='not-real-for-mock';process.env.SKILLBRIDGE_ACCESS_CODE='test-secret';process.env.SKILLBRIDGE_MODEL='gemini-3.5-flash-lite';
+let r=await status(new Request('https://skillbridge.example/api/status'));assert.equal((await r.json()).configured,true);
+r=await call('verify',{},'wrong');assert.equal(r.status,401);
+r=await call('verify');assert.equal((await r.json()).ok,true);
+r=await call('scan',{job:'',resume:''});assert.equal(r.status,400);
+let seen=false;globalThis.fetch=async(url,opts)=>{seen=true;assert.match(url,/gemini-3.5-flash-lite:generateContent/);assert.equal(opts.headers['x-goog-api-key'],'not-real-for-mock');const body=JSON.parse(opts.body);assert.equal(body.generationConfig.responseFormat.text.mimeType,'application/json');return new Response(JSON.stringify({candidates:[{content:{parts:[{text:JSON.stringify({skills:[{name:'SQL',found:true,reason:'SQL query project cited'}]})}]}}]}),{status:200,headers:{'Content-Type':'application/json'}})};
+r=await call('scan',{job:'Strong SQL required for analyst.',resume:'Built SQL queries for a dashboard.'});assert.equal(r.status,200);assert.equal((await r.json()).skills[0].name,'SQL');assert.equal(seen,true);
+globalThis.fetch=async()=>new Response('{}',{status:429});r=await call('review',{title:'Case',brief:'Brief',columns:[],rows:[],student:{}});assert.equal(r.status,429);assert.match((await r.json()).error,/rate limit/i);
+console.log('PASS: backend status, authorization, argument checks, mocked Gemini response, and rate-limit handling');
