@@ -104,3 +104,24 @@ body.dark .top-nav-link.active{color:#272037}body.dark .challenge-card .card-sym
 h1,h2,h3,h4,.section-title,.paper h1,.paper h2,.lab-layout h2,.lab-layout h3,.path-card h3,.portfolio-card h3{font-family:Outfit,Manrope,system-ui,sans-serif!important}
 /* Keep feedback clear of the hosting badge. */
 .toast-stack{left:22px;right:auto;max-width:min(340px,calc(100vw - 44px));}
+/* Color refresh: warm coral, fresh mint and blue alongside violet. */
+@media screen{
+:root{--peach:#ffd2bd;--lemon:#f4ed9f;--lilac:#d8c7ff;--sky:#c7e5ff;--pistachio:#bfebd7;--pink:#ffd0e3;--wash-violet:#efe6ff;--wash-mint:#e1f8ef;--wash-peach:#fff0e6;--wash-sky:#e8f3ff;--color-edge:#d9caef}
+body{background:radial-gradient(ellipse at 0 15%,#e9ddff 0,transparent 45%),radial-gradient(ellipse at 100% 65%,#d9f5ed 0,transparent 42%),var(--bg)}
+.hero-glass{background:radial-gradient(circle at 91% 10%,#ffbcba 0,transparent 36%),radial-gradient(circle at 65% 95%,#b8f0dc 0,transparent 35%),linear-gradient(120deg,#e5d6ff,#ddd7ff 52%,#d9ebff);border-color:#ffffff}
+.btn.primary{background:linear-gradient(115deg,#7042e8,#5058df);box-shadow:0 8px 24px #7042e833}
+.panel{background:linear-gradient(145deg,var(--surface) 66%,var(--wash-violet));border-color:var(--color-edge)}
+.challenge-card.bubbly-card:nth-child(4n+1),.path-card:nth-child(4n+1){background:linear-gradient(145deg,var(--surface) 30%,var(--wash-mint))}
+.challenge-card.bubbly-card:nth-child(4n+2),.path-card:nth-child(4n+2){background:linear-gradient(145deg,var(--surface) 30%,var(--wash-peach))}
+.challenge-card.bubbly-card:nth-child(4n+3),.path-card:nth-child(4n+3){background:linear-gradient(145deg,var(--surface) 30%,var(--wash-sky))}
+.case-glow{opacity:.9}
+.journey-section{background:linear-gradient(120deg,#e5d5ff,#d7eaff 65%,#d3f1e5)}
+.bottom-cta{background:linear-gradient(115deg,#5431c1,#7c3fc7 55%,#b34d7b)}
+.meter span{background:linear-gradient(90deg,#7951eb,#239c90)}
+body.dark{--peach:#5b3535;--lemon:#494426;--lilac:#483466;--sky:#263f64;--pistachio:#224a40;--pink:#58324d;--wash-violet:#302344;--wash-mint:#203b38;--wash-peach:#3b2a35;--wash-sky:#22354b;--color-edge:#504365;--mint:#79dfc0;--orange:#ffd09c;background:radial-gradient(ellipse at 0 10%,#2e2046 0,transparent 47%),radial-gradient(ellipse at 100% 75%,#173737 0,transparent 42%),#141321}
+body.dark .hero-glass{background:radial-gradient(circle at 90% 12%,#6c375b 0,transparent 38%),radial-gradient(circle at 65% 100%,#21574f 0,transparent 38%),linear-gradient(120deg,#302249,#30264d 52%,#263c55);border-color:#65517c}
+body.dark .journey-section{background:linear-gradient(120deg,#38274f,#253b56 65%,#20473e)}
+body.dark .btn.primary{background:linear-gradient(115deg,#8054e9,#5666dc);color:#fff}
+body.dark .top-actions .mode-pill.live{background:#20483e;color:#a0efd0;border-color:#376958}
+body.dark .topic-bubble-icon{background:#ffffff18}
+}
