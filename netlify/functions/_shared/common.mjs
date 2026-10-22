@@ -42,7 +42,7 @@ export async function askAI(instructions,payload,format){
         contents:[{role:'user',parts:[{text:JSON.stringify(payload)}]}],
         generationConfig:{
           maxOutputTokens:2300,
-          responseFormat:{text:{mimeType:'application/json',schema:format.schema}}
+          responseFormat:{text:{mimeType:'APPLICATION_JSON',schema:format.schema}}
         }
       })
     });
